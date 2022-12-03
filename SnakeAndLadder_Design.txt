@@ -1,0 +1,160 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+// Snake and Ladder
+
+class Player
+{
+public:
+    string name;
+    int position;
+
+    Player(string name, int position)
+    {
+        this -> name = name;
+        this -> position = position;
+    }
+};
+
+
+class Dice
+{
+public:
+
+    int rollDice()
+    {
+        return (rand() % 6) + 1;
+    }
+};
+
+
+class JumpOrFall
+{
+public:
+
+    int startPosition, endPosition;
+
+    JumpOrFall(int startPosition, int endPosition)
+    {
+        this -> startPosition = startPosition;
+        this -> endPosition = endPosition;
+    }
+};
+
+
+class GameBoard
+{
+    Dice dice;
+    int boardSize;
+    vector < JumpOrFall > snake, ladder;
+    queue < Player > players;
+
+public:
+
+    GameBoard(Dice dice, int boardSize, vector < JumpOrFall > & snake, vector < JumpOrFall > & ladder, queue < Player > & players)
+    {
+        this->dice = dice;
+        this->boardSize = boardSize;
+        this->snake = snake;
+        this->ladder = ladder;
+        this->players = players;
+    }
+
+
+    void startGame()
+    {
+        while(players.size() > 1)
+        {
+            auto curPlayer = players.front();
+            players.pop();
+
+            int numberOnDice = dice.rollDice();
+
+            int curPlayerPosition = curPlayer.position;
+
+            cout<<curPlayer.name<<" "<<curPlayerPosition<<" ";
+
+            int newPosition = curPlayerPosition + numberOnDice;
+
+            if(newPosition == boardSize)
+            {
+                cout<<"Player "<<curPlayer.name<<" won the game";
+                break;
+            }
+            else if(newPosition > boardSize)
+            {
+                Player pp = Player(curPlayer.name, curPlayerPosition);
+                players.push(pp);
+            }
+            else if(newPosition < boardSize)
+            {
+                int finalPosition = newPosition;
+
+                for(auto info : snake)
+                {
+                    if(info.startPosition == newPosition)
+                    {
+                        finalPosition = info.endPosition;
+                        cout<<"Player "<<curPlayer.name<<" fall from "<< info.startPosition;
+                    }
+                }
+
+                for(auto info : ladder)
+                {
+                    if(info.startPosition == newPosition)
+                    {
+                        finalPosition = info.endPosition;
+                        cout<<"Player "<<curPlayer.name<<" jump from "<< info.startPosition;
+                    }
+                }
+
+                Player pp = Player(curPlayer.name, finalPosition);
+
+                players.push(pp);
+            }
+
+            cout<<"\n";
+        }
+    }
+
+};
+
+
+
+
+int main()
+{
+
+    Player p1 = Player("A", 0); 
+
+    Player p2 = Player("B", 0);
+
+    queue < Player > players;
+
+    players.push(p1);
+    players.push(p2);
+
+    vector < JumpOrFall > snake;
+
+    JumpOrFall snake1 = JumpOrFall(99, 5);
+    JumpOrFall snake2 = JumpOrFall(69,37);
+
+    snake.push_back(snake1);
+    snake.push_back(snake2);
+
+    vector < JumpOrFall > ladder;
+
+    JumpOrFall ladder1 = JumpOrFall(15, 77);
+    JumpOrFall ladder2 = JumpOrFall(29,54);
+
+    ladder.push_back(ladder1);
+    ladder.push_back(ladder2);
+
+    Dice dice = Dice();
+
+    GameBoard gb = GameBoard(dice, 100, snake, ladder, players);
+
+    gb.startGame();
+
+    return 0;
+}
