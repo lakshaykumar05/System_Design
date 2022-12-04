@@ -1,0 +1,168 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+// Tic Tac Toe
+
+class Player
+{
+public:
+    string name;
+    char symbol;
+
+    Player(string name, char symbol)
+    {
+        this -> name = name;
+        this -> symbol = symbol;
+    }
+};
+
+
+class Input
+{
+    vector < int > hash;
+
+public:
+
+    void initialize(int boardSize)
+    {
+        hash.resize(boardSize * boardSize);
+    }
+
+    int getInput(int boardSize)
+    {
+        int val = ((rand()) % (boardSize * boardSize));
+
+        for(int value = val, cnt = 0; cnt <= boardSize * boardSize ; value ++, cnt ++)
+        {
+            if(hash[value % (boardSize * boardSize)] == 0)
+            {
+                hash[value % (boardSize * boardSize)] = 1;
+                return (value % (boardSize * boardSize));
+            }
+        }
+    }
+
+};
+
+
+class GameBoard
+{
+public:
+
+    int boardSize;
+    queue < Player > players;
+    vector < vector < char > > grid;
+    Input input;
+
+    GameBoard(int boardSize, queue < Player > & players, vector < vector < char > > & grid, Input &input)
+    {
+        this -> boardSize = boardSize;
+        this -> players = players;
+        this -> grid = grid;
+        this -> input = input;
+    }
+
+
+    void startGame()
+    {
+        int moves = 0;
+
+        while(moves < boardSize * boardSize)
+        {
+            auto currentPlayer = players.front();
+            players.pop();
+
+            int finalInput = input.getInput(boardSize);
+
+            int row = (finalInput / boardSize);
+            int col = finalInput % boardSize;
+            
+            grid[row][col] = currentPlayer.symbol;
+
+            if(checkResult(row, col, currentPlayer.symbol))
+            {
+                cout<<"Player "<<currentPlayer.name<<" won the game\n";
+                return;
+            }
+
+            players.push(currentPlayer);
+
+            moves += 1;
+        }
+
+        cout<<"GAME DRAWS!!!\n";
+    }
+
+    bool checkResult(int row, int col, char symbol)
+    {
+        bool checkInRow = true, checkInCol = true, checkInDiag = true, checkInAntiDiag = true;
+
+        for(int i = 0; i < boardSize; i ++)
+        {
+            if(grid[i][col] != symbol)
+                checkInRow = false;
+
+            if(grid[row][i] != symbol)
+                checkInCol = false;
+        }
+
+        int i = 0, j = 0;
+
+        while(i < boardSize)
+        {
+            if(grid[i][i] != symbol)
+                checkInDiag = false;
+
+            i += 1;
+        }
+
+        i = 0, j = boardSize - 1;
+
+        while(i < boardSize and j >= 0)
+        {
+            if(grid[i][j] != symbol)
+                checkInAntiDiag = false;
+
+            i += 1;
+            j -= 1;
+        }
+
+        return (checkInRow or checkInCol or checkInDiag or checkInAntiDiag);
+    }
+
+};
+
+
+
+int main()
+{
+    int boardSize = 5;
+
+    Player player1 = Player("ABC", 'O');
+    Player player2 = Player("XYZ", 'X');
+
+    queue < Player > players;
+
+    players.push(player1);
+    players.push(player2);
+
+    Input input;
+
+    input.initialize(boardSize);
+
+    vector < vector < char > > grid(boardSize, vector < char > (boardSize, '.'));
+
+    GameBoard gb = GameBoard(boardSize, players, grid, input);
+
+    gb.startGame();
+
+
+    for(auto &x : gb.grid)
+    {
+        for(auto &y : x)
+            cout<<y<<" ";
+        cout<<"\n";
+    }
+
+    return 0;
+}
